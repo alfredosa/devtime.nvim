@@ -38,4 +38,10 @@ Sqlite3 is required to operate this pluggin. It will create a db in `.local/shar
   },
 ```
 
+## Development roadmap:
 
+I plan on adding:
+
+- Custom configurations.
+- a local stats page (Optional Web Server)
+- Batching. The current method works fine but I think I can optimize this by batching inserts. 
