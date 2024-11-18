@@ -74,7 +74,7 @@ function M.create_tbl()
   M.db:sql([[
       CREATE TABLE IF NOT EXISTS tracker (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        language TEXT,
+        language TEXT NOT NULL,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         duration INTEGER,
         file TEXT
