@@ -1,3 +1,4 @@
+local queries = require("devtime.queries")
 local sqlite = require("sqlite")
 local path = vim.fn.fnamemodify(vim.fn.stdpath("data") .. "/devtime/tracker.db", ":p")
 local M = {}
@@ -44,7 +45,7 @@ function M.start_tracker()
 end
 
 function M.stop_tracker()
-  if M.filetype ~= "" then
+  if M.filetype ~= "" and M.filetype ~= vim.NIL then
     local diff = os.difftime(os.time(), M.init)
     if diff >= 1 then M.insert(M.filetype, diff, M.current_file) end
     M.reset_values()
@@ -73,7 +74,7 @@ function M.create_tbl()
   M.db:sql([[
       CREATE TABLE IF NOT EXISTS tracker (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        language TEXT,
+        language TEXT NOT NULL,
         created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         duration INTEGER,
         file TEXT
@@ -95,6 +96,22 @@ function M.cleanup()
     M.db:close()
     M.db = nil
   end
+end
+
+function M.print_todays()
+  print(vim.inspect(queries.get_today_stats(M.db)))
+end
+
+function M.print_weekly()
+  print(vim.inspect(queries.get_weekly_stats(M.db)))
+end
+
+function M.print_monthly()
+  print(vim.inspect(queries.get_monthly_stats(M.db)))
+end
+
+function M.print_hourly()
+  print(vim.inspect(queries.get_hourly_stats(M.db)))
 end
 
 return M
