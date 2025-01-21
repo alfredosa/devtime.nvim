@@ -2,6 +2,11 @@
 
 Neovim plugin to track language usage in a local sqlite3. For those data hoarders like me, who like to analyze random stuff. 
 
+## Coming soon:
+
+- Allowing export to any endpoint through configuration.
+> I want to be able to treat neovim as an iot device and allow users to export it without providing a backend or forcing logic on them.
+
 ## What's stored:
 
 - language (Based on buffers opened and closed)
