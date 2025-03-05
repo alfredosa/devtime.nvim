@@ -1,9 +1,26 @@
+local curl = require("plenary.curl")
 local queries = require("devtime.queries")
 local sqlite = require("sqlite")
 local path = vim.fn.fnamemodify(vim.fn.stdpath("data") .. "/devtime/tracker.db", ":p")
 local M = {}
 
-function M.setup()
+local defaults = {
+  custom_telemetry_enabled = false,
+  telemetry_url = "",
+  flush_on_save = true,
+
+  -- If flush_on_save is not enabled, then we can add a flush time.
+  flush_timer = 30,
+  headers = {
+    ["Content-Type"] = "application/json",
+  },
+}
+
+function M.setup(opts)
+  opts = vim.tbl_deep_extend("force", defaults, opts or {})
+
+  M.config = opts
+
   local ok, err = pcall(function()
     vim.fn.mkdir(vim.fn.stdpath("data") .. "/devtime", "p")
     M.db = sqlite.open(path)
