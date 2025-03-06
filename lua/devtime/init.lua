@@ -157,24 +157,19 @@ end
 
 function M.migrate_synced_time()
   -- Check if column exists first
-  vim.notify("Checking migration: Synced column")
   local column_exists = M.db:sql("PRAGMA table_info(tracker)") or {}
   local has_synced = false
 
   for _, col in ipairs(column_exists) do
     if col.name == "synced" then
-      vim.notify("Column synced already exists. Skipping migration")
       has_synced = true
       break
     end
   end
 
-  if not has_synced then
-    vim.notify("Migrating database: Synced column")
-    M.db:sql([[
+  if not has_synced then M.db:sql([[
       ALTER TABLE tracker ADD COLUMN synced INTEGER DEFAULT 0
-    ]])
-  end
+    ]]) end
 end
 
 function M.cleanup()
