@@ -19,9 +19,7 @@ function M.setup(opts)
   M.config = opts
 
   -- Set up the flush timer if needed
-  if M.config.custom_telemetry_enabled and not M.config.flush_on_save and M.config.flush_timer > 0 then
-    M.setup_flush_timer()
-  end
+  if M.config.custom_telemetry_enabled and M.config.flush_timer > 0 then M.setup_flush_timer() end
 
   local ok, err = pcall(function()
     vim.fn.mkdir(vim.fn.stdpath("data") .. "/devtime", "p")
@@ -95,21 +93,19 @@ function M.flush_telemetry()
 
   local data_to_flush = queries.get_unsynced_stats(M.db)
 
-  if vim.tbl_isempty(data_to_flush) then return true end
+  if not data_to_flush or vim.tbl_isempty(data_to_flush) then return true end
 
   -- Send the data
   local response = curl.post(M.config.telemetry_url, {
     headers = M.config.headers,
     body = vim.fn.json_encode(data_to_flush),
-    timeout = 10000, -- 10 second timeout
+    timeout = 10000,
   })
 
   if response.status >= 200 and response.status < 300 then
     for _, record in ipairs(data_to_flush) do
-      M.db:update("tracker", {
+      M.db:update("tracker", "id = " .. record.id, {
         synced = 1,
-      }, {
-        id = record.id,
       })
     end
     M.last_flush_time = os.time()
