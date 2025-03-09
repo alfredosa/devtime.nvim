@@ -63,4 +63,19 @@ function queries.get_monthly_stats(db)
  ]])
 end
 
+---@param db Database
+function queries.get_unsynced_stats(db)
+  return db:sql([[
+    SELECT
+      language,
+      date(created) as day,
+      COUNT(*) as count,
+      SUM(duration) as seconds,
+      id
+    FROM tracker
+    WHERE synced = 0
+    GROUP BY language, date(created)
+  ]])
+end
+
 return queries
