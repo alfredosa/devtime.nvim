@@ -70,8 +70,7 @@ function queries.get_unsynced_stats(db)
       language,
       date(created) as day,
       COUNT(*) as count,
-      SUM(duration) as total_duration,
-      GROUP_CONCAT(id) as record_ids,
+      SUM(duration) as seconds,
       id
     FROM tracker
     WHERE synced = 0

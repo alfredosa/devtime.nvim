@@ -11,6 +11,7 @@ local defaults = {
   headers = {
     ["Content-Type"] = "application/json",
   },
+  notify_on_flush = false,
 }
 
 function M.setup(opts)
@@ -18,7 +19,6 @@ function M.setup(opts)
 
   M.config = opts
 
-  -- Set up the flush timer if needed
   if M.config.custom_telemetry_enabled and M.config.flush_timer > 0 then M.setup_flush_timer() end
 
   local ok, err = pcall(function()
@@ -31,10 +31,7 @@ function M.setup(opts)
 
   vim.api.nvim_create_autocmd("VimLeavePre", {
     callback = function()
-      if M.db then
-        -- Ensure any pending tracking is written
-        M.cleanup()
-      end
+      if M.db then M.cleanup() end
     end,
   })
 
@@ -87,7 +84,6 @@ function M.wipe_db()
   M.db:drop_table("tracker")
 end
 
--- Add this function to handle flushing data to the remote endpoint
 function M.flush_telemetry()
   if not M.config.custom_telemetry_enabled or M.config.telemetry_url == "" then return false end
 
@@ -103,15 +99,15 @@ function M.flush_telemetry()
   })
 
   if response.status >= 200 and response.status < 300 then
-    for _, record in ipairs(data_to_flush) do
-      M.db:update("tracker", "id = " .. record.id, {
-        synced = 1,
-      })
-    end
+    M.db:sql([[
+        UPDATE tracker
+        SET synced = 1
+        WHERE (synced = 0 OR synced IS NULL)
+      ]])
     M.last_flush_time = os.time()
+    if M.notify_on_flush then vim.notify("flushed successfully", vim.log.levels.INFO) end
     return true
   else
-    -- Handle errors, maybe log them
     vim.notify("Failed to flush telemetry data: " .. (response.body or "Unknown error"), vim.log.levels.WARN)
     return false
   end

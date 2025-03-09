@@ -38,6 +38,7 @@ SQLite3 is used to store tracking data in `.local/share/nvim/devtime` directory.
         ["Content-Type"] = "application/json",
         ["Authorization"] = "Bearer " .. token,
       },
+      notify_on_flush = false, -- Allows to pop a notification on flush, default is false
     })
   end,
 }
