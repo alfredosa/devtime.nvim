@@ -2,7 +2,12 @@ local curl = require("plenary.curl")
 local queries = require("devtime.queries")
 local sqlite = require("sqlite")
 local path = vim.fn.fnamemodify(vim.fn.stdpath("data") .. "/devtime/tracker.db", ":p")
-local M = {}
+
+local M = {
+  filetype = "",
+  init = 0,
+  current_file = "",
+}
 
 local defaults = {
   custom_telemetry_enabled = false,
@@ -50,16 +55,25 @@ function M.setup(opts)
 end
 
 function M.start_tracker()
-  local ft = vim.bo.filetype
-  if ft ~= "" then
-    M.filetype = ft
-    M.init = os.time()
-    M.current_file = vim.api.nvim_buf_get_name(0)
-  end
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local buftype = vim.bo[bufnr].buftype
+  if buftype ~= "" then return end
+
+  local filename = vim.api.nvim_buf_get_name(bufnr)
+  if filename == "" then return end
+
+  local ft = vim.bo[bufnr].filetype
+  if not ft or ft == "" or ft == "TelescopePrompt" or ft == "NvimTree" then return end
+
+  -- If we get here, it's a legit buffer we want to track
+  M.filetype = ft
+  M.init = os.time()
+  M.current_file = filename
 end
 
 function M.stop_tracker()
-  if M.filetype ~= "" and M.filetype ~= vim.NIL then
+  if M.filetype and type(M.filetype) == "string" and M.filetype ~= "" then
     local diff = os.difftime(os.time(), M.init)
     if diff >= 1 then M.insert(M.filetype, diff, M.current_file) end
     M.reset_values()
