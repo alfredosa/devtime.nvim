@@ -1,6 +1,10 @@
 # devtime.nvim
 Neovim plugin to track language usage in a local SQLite database. For data hoarders who like to analyze their coding patterns.
 
+> [!WARNING]
+> This project is now officially migrated to https://git.alfie.news/devtime.nvim/
+> I will likely delete this sometime.
+
 ## Features
 - Tracks programming language usage based on buffers opened and closed
 - Records duration spent in each language
